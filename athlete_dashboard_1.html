@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athlete HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:    #0d0e12;
+  --bg2:   #13151c;
+  --bg3:   #1a1d28;
+  --bg4:   #1f2335;
+  --bord:  rgba(255,255,255,0.07);
+  --bord2: rgba(255,255,255,0.13);
+  --text:  #e2e4ef;
+  --muted: #767b96;
+  --dim:   #454866;
+  --gold:  #f5a623;
+  --gold2: #ffca6e;
+  --teal:  #2dd4bf;
+  --teal2: #5eead4;
+  --red:   #f56565;
+  --green: #48bb78;
+  --purple:#9f7aea;
+  --r:     8px;
+  --r2:    14px;
+  --display: 'Barlow Condensed', sans-serif;
+  --body:    'Inter', system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden}
+
+/* ── SCAN LINE AMBIENT ── */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px);
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:52px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+  background:rgba(13,14,18,.9);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bord);
+}
+.nav-logo{
+  font-family:var(--display);font-weight:900;font-size:18px;letter-spacing:.06em;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 50%,var(--teal) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.nav-tabs{display:flex;gap:1px;background:var(--bg3);border-radius:var(--r);padding:3px;border:1px solid var(--bord)}
+.nav-tab{
+  padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;
+  letter-spacing:.04em;color:var(--muted);cursor:pointer;border:none;background:none;
+  transition:all .18s;text-transform:uppercase;
+}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{background:var(--bg4);color:var(--gold);box-shadow:0 0 12px rgba(245,166,35,.15)}
+.nav-right{font-size:11px;font-family:var(--display);font-weight:600;color:var(--dim);letter-spacing:.08em}
+
+/* ── PAGES ── */
+.page{display:none;padding:68px 18px 48px;max-width:860px;margin:0 auto;position:relative;z-index:1}
+.page.active{display:block}
+
+/* ── TYPOGRAPHY ── */
+.display-num{font-family:var(--display);font-weight:900;letter-spacing:-.01em}
+.label-upper{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* ── STAT ROW ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+@media(max-width:540px){.stat-row{grid-template-columns:repeat(3,1fr)}}
+.stat-box{
+  background:var(--bg2);border:1px solid var(--bord);border-radius:var(--r2);
+  padding:14px 16px;position:relative;overflow:hidden;
+}
+.stat-box::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.5;
+}
+.stat-box.teal::after{background:linear-gradient(90deg,transparent,var(--teal),transparent)}
+.stat-box.green::after{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-val{font-family:var(--display);font-size:32px;font-weight:900;color:var(--gold);line-height:1;margin-top:6px}
+.stat-val.teal{color:var(--teal)}
+.stat-val.green{color:var(--green)}
+.stat-unit{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── WEEK GRID ── */
+.week-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:20px}
+@media(max-width:640px){.week-wrap{grid-template-columns:1fr}}
+.day-tile{
+  background:var(--bg2);border:1px solid var(--bord);border-radius:var(--r2);
+  padding:11px 10px;transition:border-color .18s;cursor:default;
+}
+.day-tile.today{border-color:var(--gold);box-shadow:0 0 16px rgba(245,166,35,.12)}
+.day-name-h{font-family:var(--display);font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:7px}
+.day-tile.today .day-name-h{color:var(--gold)}
+.session-pill{
+  display:block;font-size:10px;font-weight:600;padding:3px 6px;border-radius:5px;
+  margin-bottom:3px;letter-spacing:.03em;line-height:1.4;
+}
+.sp-gym{background:rgba(245,166,35,.12);color:#ffca6e}
+.sp-run{background:rgba(72,187,120,.12);color:#68d391}
+.sp-swim{background:rgba(45,212,191,.12);color:#5eead4}
+.sp-bike{background:rgba(159,122,234,.12);color:#b794f4}
+.sp-rest{background:rgba(255,255,255,.04);color:var(--dim)}
+.session-note{font-size:9px;color:var(--dim);margin-top:1px}
+
+/* ── CARD ── */
+.card{
+  background:var(--bg2);border:1px solid var(--bord);border-radius:var(--r2);
+  padding:18px 20px;margin-bottom:14px;position:relative;overflow:hidden;
+}
+.card-accent-gold::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:3px 0 0 3px}
+.card-accent-teal::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal);border-radius:3px 0 0 3px}
+.card-accent-green::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);border-radius:3px 0 0 3px}
+.card-accent-purple::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--purple);border-radius:3px 0 0 3px}
+.card-title{font-family:var(--display);font-size:17px;font-weight:800;letter-spacing:.02em;margin-bottom:4px}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+
+/* ── SESSION TABS ── */
+.sess-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.sess-tab{
+  font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.06em;
+  padding:6px 14px;border-radius:var(--r);border:1px solid var(--bord);
+  background:var(--bg3);color:var(--muted);cursor:pointer;transition:all .15s;text-transform:uppercase;
+}
+.sess-tab:hover{color:var(--text);border-color:var(--bord2)}
+.sess-tab.active{background:rgba(245,166,35,.1);border-color:var(--gold);color:var(--gold)}
+.sess-tab.teal.active{background:rgba(45,212,191,.1);border-color:var(--teal);color:var(--teal)}
+.sess-tab.green.active{background:rgba(72,187,120,.1);border-color:var(--green);color:var(--green)}
+.sess-tab.purple.active{background:rgba(159,122,234,.1);border-color:var(--purple);color:var(--purple)}
+.sess-content{display:none}
+.sess-content.active{display:block}
+
+/* ── GYM MODE BTN ── */
+.gymmode-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,var(--gold),#e8920a);color:#0d0e12;
+  border:none;border-radius:var(--r);padding:10px 18px;
+  font-family:var(--display);font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  cursor:pointer;margin-bottom:16px;transition:opacity .15s;box-shadow:0 4px 20px rgba(245,166,35,.3);
+}
+.gymmode-btn:hover{opacity:.88}
+
+/* ── EXERCISE ROW ── */
+.ex-grid{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--bord)}
+.ex-grid:last-child{border-bottom:none}
+.ex-num{
+  font-family:var(--display);font-size:22px;font-weight:900;color:var(--bord2);line-height:1;
+  padding-top:1px;
+}
+.ex-name{font-size:14px;font-weight:600;margin-bottom:3px;color:var(--text)}
+.ex-tip{font-size:11px;color:var(--muted);line-height:1.55}
+.ex-cite{font-size:10px;color:rgba(245,166,35,.45);font-style:italic;margin-top:3px}
+.ex-right{text-align:right}
+.ex-sets{font-family:var(--display);font-size:15px;font-weight:800;color:var(--gold);white-space:nowrap}
+.ex-rest{font-size:10px;color:var(--dim);margin-top:2px;white-space:nowrap}
+
+/* ── TIP BOX ── */
+.tip-box{
+  background:rgba(245,166,35,.05);border:1px solid rgba(245,166,35,.2);
+  border-radius:var(--r);padding:11px 14px;font-size:12px;color:var(--muted);
+  line-height:1.6;margin-bottom:14px;
+}
+.tip-box.teal{background:rgba(45,212,191,.05);border-color:rgba(45,212,191,.2)}
+.tip-box strong{color:var(--text)}
+.cite{font-size:10px;color:rgba(245,166,35,.5);font-style:italic}
+.cite.teal{color:rgba(45,212,191,.5)}
+
+/* ── GYM OVERLAY ── */
+#gymOverlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:var(--bg);overflow-y:auto;padding:24px 20px;
+}
+.gm-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
+.gm-session{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.gm-prog{font-size:12px;color:var(--dim)}
+.gm-close-btn{
+  background:var(--bg3);border:1px solid var(--bord2);color:var(--text);
+  padding:7px 14px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;
+}
+.gm-ex-name{font-family:var(--display);font-size:36px;font-weight:900;line-height:1.1;margin-bottom:8px}
+.gm-sets-big{font-family:var(--display);font-size:64px;font-weight:900;color:var(--gold);line-height:1;margin-bottom:4px}
+.gm-rest-txt{font-size:12px;color:var(--muted);margin-bottom:18px}
+.gm-tip-box{
+  background:var(--bg2);border-left:3px solid var(--teal);border-radius:0 var(--r) var(--r) 0;
+  padding:12px 14px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:20px;
+}
+.gm-cite-txt{font-size:10px;color:rgba(45,212,191,.45);font-style:italic;margin-top:5px}
+.set-dots{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.set-dot{
+  width:38px;height:38px;border-radius:50%;border:2px solid var(--bord2);
+  background:transparent;cursor:pointer;font-family:var(--display);font-size:14px;
+  font-weight:800;color:var(--muted);display:flex;align-items:center;justify-content:center;
+  transition:all .18s;
+}
+.set-dot.done{background:var(--gold);border-color:var(--gold);color:var(--bg)}
+.rest-timer{
+  display:none;text-align:center;background:var(--bg3);border:1px solid var(--bord);
+  border-radius:var(--r2);padding:16px;margin-bottom:16px;
+}
+.timer-num{font-family:var(--display);font-size:52px;font-weight:900;color:var(--teal);line-height:1}
+.timer-lbl{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.06em;text-transform:uppercase}
+.gm-btns{display:flex;gap:8px;margin-bottom:10px}
+.gm-btn{
+  flex:1;padding:14px;border-radius:var(--r);font-family:var(--display);font-size:16px;
+  font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s;
+}
+.gm-btn:hover{opacity:.85}
+.gm-prev{background:var(--bg3);color:var(--text);border:1px solid var(--bord2)}
+.gm-next{background:linear-gradient(135deg,var(--gold),#e8920a);color:var(--bg)}
+.gm-log{
+  width:100%;padding:14px;border:none;border-radius:var(--r);
+  background:linear-gradient(135deg,var(--teal),#0d9488);color:var(--bg);
+  font-family:var(--display);font-size:16px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;cursor:pointer;margin-top:6px;transition:opacity .15s;
+}
+.gm-log:hover{opacity:.88}
+
+/* ── ROADMAP ── */
+.rm-phases{position:relative;padding-left:0}
+.rm-phases::before{content:'';position:absolute;left:20px;top:20px;bottom:20px;width:1px;background:linear-gradient(180deg,var(--gold),var(--teal),var(--green),var(--red))}
+.rm-item{display:flex;gap:20px;padding-bottom:32px}
+.rm-dot{
+  width:40px;height:40px;border-radius:50%;border:2px solid;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;background:var(--bg);
+  font-family:var(--display);font-size:16px;font-weight:900;position:relative;z-index:1;
+}
+.rm-body{flex:1;padding-top:8px}
+.rm-phase-num{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.rm-title{font-family:var(--display);font-size:22px;font-weight:900;margin-bottom:3px}
+.rm-period{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:10px;letter-spacing:.04em}
+.rm-list{list-style:none}
+.rm-list li{font-size:12px;color:var(--muted);padding:2px 0;line-height:1.55;padding-left:14px;position:relative}
+.rm-list li::before{content:'→';position:absolute;left:0;color:inherit;font-weight:700}
+.rm-cite{font-size:10px;color:rgba(245,166,35,.4);font-style:italic;margin-top:8px;display:block}
+
+/* ── NUTRITION ── */
+.meal-line{position:relative;padding-left:0}
+.meal-line::before{content:'';position:absolute;left:54px;top:8px;bottom:0;width:1px;background:linear-gradient(180deg,var(--gold),var(--teal))}
+.meal-item{display:grid;grid-template-columns:58px 1fr;gap:14px;padding-bottom:22px;align-items:start}
+.meal-time{font-family:var(--display);font-size:14px;font-weight:800;color:var(--gold);text-align:right;padding-top:2px}
+.meal-dot{width:10px;height:10px;border-radius:50%;background:var(--gold);position:absolute;left:50px;margin-top:4px}
+.meal-body{padding-left:14px}
+.meal-name{font-size:14px;font-weight:600;margin-bottom:3px}
+.meal-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.macro-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.macro{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:.03em}
+.mp{background:rgba(245,166,35,.12);color:var(--gold2)}
+.mc{background:rgba(45,212,191,.12);color:var(--teal2)}
+.mf{background:rgba(72,187,120,.12);color:#68d391}
+.me{background:rgba(245,101,101,.12);color:#fc8181}
+.meal-cite{font-size:10px;color:rgba(245,166,35,.4);font-style:italic;margin-top:4px;display:block}
+
+/* ── TRACKER ── */
+.log-form-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:10px}
+@media(max-width:520px){.log-form-grid{grid-template-columns:1fr}}
+.field-lbl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+select,input,textarea{
+  background:var(--bg3);border:1px solid var(--bord);color:var(--text);
+  border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:var(--body);
+  width:100%;outline:none;transition:border-color .15s;
+}
+select:focus,input:focus,textarea:focus{border-color:var(--gold)}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),#e8920a);color:var(--bg);border:none;
+  border-radius:var(--r);padding:10px 18px;font-family:var(--display);font-size:14px;
+  font-weight:800;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  transition:opacity .15s;white-space:nowrap;
+}
+.btn-gold:hover{opacity:.86}
+.log-entry{
+  background:var(--bg2);border-radius:var(--r2);padding:12px 16px;
+  margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;
+  border-left:3px solid var(--bord2);
+}
+.log-entry.gym{border-left-color:var(--gold)}
+.log-entry.run{border-left-color:var(--green)}
+.log-entry.swim{border-left-color:var(--teal)}
+.log-entry.bike{border-left-color:var(--purple)}
+.log-type-tag{
+  font-family:var(--display);font-size:12px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--gold);
+}
+.log-entry.run .log-type-tag{color:var(--green)}
+.log-entry.swim .log-type-tag{color:var(--teal)}
+.log-entry.bike .log-type-tag{color:var(--purple)}
+.log-date{font-size:11px;color:var(--muted);font-family:var(--display);font-weight:600;margin-left:8px}
+.log-notes{font-size:12px;color:var(--muted);margin-top:3px}
+.log-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;margin-left:auto;flex-shrink:0;padding:0}
+.log-del:hover{color:var(--red)}
+.empty-log{text-align:center;padding:36px;color:var(--dim);font-size:13px}
+
+/* ── CHECKLIST ── */
+.check-list{list-style:none}
+.check-item{
+  display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--bord);cursor:pointer;transition:opacity .15s;
+}
+.check-item:last-child{border-bottom:none}
+.check-item:hover{opacity:.8}
+.check-box{
+  width:18px;height:18px;border-radius:4px;border:1.5px solid var(--bord2);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.check-box.on{background:var(--green);border-color:var(--green)}
+.check-box.on::after{content:'✓';font-size:10px;color:var(--bg);font-weight:700}
+.check-text{font-size:12px;flex:1}
+.check-text.on{text-decoration:line-through;color:var(--muted)}
+.prog-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:12px}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s;background:linear-gradient(90deg,var(--green),var(--teal))}
+
+/* ── DIVIDER ── */
+.div{border:none;border-top:1px solid var(--bord);margin:16px 0}
+.section-h{
+  font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:12px;
+}
+
+/* ── SWIM / RUN BLOCKS ── */
+.swim-block{margin-bottom:14px}
+.swim-block-h{font-family:var(--display);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.swim-row{display:flex;justify-content:space-between;align-items:start;padding:7px 0;border-bottom:1px solid var(--bord);font-size:12px}
+.swim-row:last-child{border-bottom:none}
+.swim-dist{font-family:var(--display);font-size:14px;font-weight:800;color:var(--teal);white-space:nowrap}
+.swim-detail{font-size:11px;color:var(--muted);margin-top:2px}
+.run-block{background:var(--bg3);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.run-block-h{font-size:13px;font-weight:600;margin-bottom:3px}
+.run-block-d{font-size:12px;color:var(--muted);line-height:1.55}
+.run-meta{font-family:var(--display);font-size:12px;font-weight:700;color:var(--green);margin-top:5px}
+
+/* ── WEEK STATS ── */
+.week-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">ATHLETE HQ</span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="goPage('week',this)">Week</button>
+    <button class="nav-tab" onclick="goPage('sessions',this)">Sessions</button>
+    <button class="nav-tab" onclick="goPage('nutrition',this)">Nutrition</button>
+    <button class="nav-tab" onclick="goPage('roadmap',this)">Roadmap</button>
+    <button class="nav-tab" onclick="goPage('tracker',this)">Tracker</button>
+  </div>
+  <span class="nav-right" id="navDate"></span>
+</nav>
+
+<!-- GYM OVERLAY -->
+<div id="gymOverlay">
+  <div class="gm-head">
+    <div>
+      <div class="gm-session" id="gm-sess-name"></div>
+      <div class="gm-prog" id="gm-prog"></div>
+    </div>
+    <button class="gm-close-btn" onclick="closeGym()">✕ Exit</button>
+  </div>
+  <div class="set-dots" id="gm-dots"></div>
+  <div class="rest-timer" id="restTimer">
+    <div class="timer-num" id="timerVal">90</div>
+    <div class="timer-lbl">Rest — breathe · hydrate</div>
+  </div>
+  <div class="gm-ex-name" id="gm-name"></div>
+  <div class="gm-sets-big" id="gm-sets"></div>
+  <div class="gm-rest-txt" id="gm-rest-lbl"></div>
+  <div class="gm-tip-box"><span id="gm-tip"></span><div class="gm-cite-txt" id="gm-cite"></div></div>
+  <div class="gm-btns">
+    <button class="gm-btn gm-prev" onclick="gmMove(-1)">← Prev</button>
+    <button class="gm-btn gm-next" onclick="gmMove(1)">Next →</button>
+  </div>
+  <button class="gm-log" onclick="gmFinish()">✓ Log this session</button>
+</div>
+
+<!-- ═══ WEEK ═══ -->
+<div class="page active" id="page-week">
+  <div class="stat-row">
+    <div class="stat-box"><div class="label-upper">Sessions this week</div><div class="stat-val" id="weekVol">0</div><div class="stat-unit">logged</div></div>
+    <div class="stat-box teal"><div class="label-upper">Protein target</div><div class="stat-val teal">150</div><div class="stat-unit">g/day · 2.0 g/kg</div></div>
+    <div class="stat-box green"><div class="label-upper">Current phase</div><div class="stat-val green" style="font-size:18px;padding-top:8px">Foundation</div><div class="stat-unit">Jun → Oct 2026</div></div>
+  </div>
+
+  <div class="week-wrap" id="weekGrid"></div>
+
+  <div class="card card-accent-green">
+    <div class="card-title">Sunday prep checklist</div>
+    <div class="card-sub">Set up your week in one session — 60–90 min total cooking.</div>
+    <ul class="check-list" id="prepList">
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Cook chicken breast ×2 (400 g) — Mon/Tue/Thu lunch</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Cook rice batch (300 g dry) — 3 lunches</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Portion Greek yoghurt + cottage cheese (200 g each) × 4</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Buy bananas × 7 (pre-workout carb source)</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Buy eggs × 35+ (weekly dinner protein)</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Roast vegetables (bell pepper, broccoli, courgette) × 3 portions</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Portion oats (60 g) into jars × 4</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Restock olive oil / avocado</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Pack gym bag for Mon / Tue / Thu (8:00 start)</span></li>
+    </ul>
+    <div class="prog-bar"><div class="prog-fill" id="prepFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- ═══ SESSIONS ═══ -->
+<div class="page" id="page-sessions">
+  <div class="sess-tabs">
+    <button class="sess-tab active" onclick="showSess('A',this)">Gym A · Pull</button>
+    <button class="sess-tab" onclick="showSess('B',this)">Gym B · Push</button>
+    <button class="sess-tab" onclick="showSess('C',this)">Gym C · Legs</button>
+    <button class="sess-tab teal" onclick="showSess('swim',this)">Swim</button>
+    <button class="sess-tab green" onclick="showSess('run',this)">Run</button>
+    <button class="sess-tab purple" onclick="showSess('bike',this)">Bike</button>
+  </div>
+
+  <!-- GYM A -->
+  <div class="sess-content active" id="sess-A">
+    <button class="gymmode-btn" onclick="openGym('A')">▶ Gym mode</button>
+    <div class="tip-box"><strong>Pull + Core · Mon · ~60 min.</strong> Rest: 90–120 s compounds, 60 s isolation. <span class="cite">Singer et al. (2024, Front Sports Act Living, Bayesian meta-analysis): hypertrophic benefit plateaus at ~90 s inter-set rest; no additional gain beyond that for isolation work.</span></div>
+    <div class="card card-accent-gold" style="padding:14px 18px">
+      <div class="ex-grid"><div class="ex-num">01</div><div><div class="ex-name">Lat pulldown (overhand, shoulder-width)</div><div class="ex-tip">Elbows drive down and back. 15° lean. Full stretch at top. Initiate with lats, not biceps.</div><div class="ex-cite">Andersen et al. (2014, J Strength Cond Res): shoulder-width overhand grip = peak lat EMG vs narrow or underhand.</div></div><div class="ex-right"><div class="ex-sets">4 × 8–10</div><div class="ex-rest">Rest 2 min · RPE 7–8</div></div></div>
+      <div class="ex-grid"><div class="ex-num">02</div><div><div class="ex-name">Seated cable row (close-grip)</div><div class="ex-tip">Row to lower sternum. 1-s scapular retraction. Neutral spine on eccentric.</div><div class="ex-cite">Leppänen et al. (2024, BJSM): rhomboid/mid-trap strength reduces marathon running injury incidence vs stretching only.</div></div><div class="ex-right"><div class="ex-sets">4 × 10</div><div class="ex-rest">Rest 90 s · RPE 7–8</div></div></div>
+      <div class="ex-grid"><div class="ex-num">03</div><div><div class="ex-name">Chest-supported dumbbell row</div><div class="ex-tip">Prone on incline bench. Eliminates lumbar compensation entirely. Lead with elbow, squeeze at top.</div><div class="ex-cite">Schoenfeld (2021, NSCA Essentials): prone support isolates lat/rhomboid — removes the posterior-chain fatigue confound present in bent-over rows.</div></div><div class="ex-right"><div class="ex-sets">3 × 10</div><div class="ex-rest">Rest 90 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">04</div><div><div class="ex-name">Face pull (cable rope, eye-level)</div><div class="ex-tip">External rotation at end-range. Upper arms parallel to floor. Restores posterior cuff balance disrupted by pressing and swim catch.</div><div class="ex-cite">Reinold et al. (2009, Am J Sports Med): face pull + external rotation drill is the most effective conservative intervention for subacromial impingement.</div></div><div class="ex-right"><div class="ex-sets">3 × 15</div><div class="ex-rest">Rest 60 s · RPE 6–7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">05</div><div><div class="ex-name">DB curl (supinated, alternating)</div><div class="ex-tip">No swing. 2-s eccentric. Supinate throughout arc — don't stay neutral.</div><div class="ex-cite">Staudenmann et al. (2010, J Electromyogr Kinesiol): full supination produces significantly higher biceps short-head EMG vs neutral grip.</div></div><div class="ex-right"><div class="ex-sets">3 × 10–12</div><div class="ex-rest">Rest 60 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">06</div><div><div class="ex-name">Dead bug (anti-extension core)</div><div class="ex-tip">Lumbar flat throughout. Opposite arm/leg extend slowly. Exhale on extension. Replaces crunches — trains stiffness not flexion.</div><div class="ex-cite">McGill (2010, Clin Biomech): lumbar stiffness during gait reduces metabolic energy loss at each running stride.</div></div><div class="ex-right"><div class="ex-sets">3 × 10/side</div><div class="ex-rest">Rest 45 s · RPE 6</div></div></div>
+    </div>
+  </div>
+
+  <!-- GYM B -->
+  <div class="sess-content" id="sess-B">
+    <button class="gymmode-btn" onclick="openGym('B')">▶ Gym mode</button>
+    <div class="tip-box"><strong>Push · Tue · ~60 min.</strong> Compound before isolation — preserves output. <span class="cite">Simão et al. (2012, J Strength Cond Res): exercise order significantly reduces performance on exercises placed later; compound-first minimises this loss.</span></div>
+    <div class="card card-accent-gold" style="padding:14px 18px">
+      <div class="ex-grid"><div class="ex-num">01</div><div><div class="ex-name">Incline DB press (30–45°)</div><div class="ex-tip">2-s descent. Elbows ~45° to torso. Don't lock out at top — keep tension on pec.</div><div class="ex-cite">Barnett et al. (1995, J Strength Cond Res): incline angle maximises upper pec + anterior delt activation vs flat. Anterior delt strength directly supports swim catch phase.</div></div><div class="ex-right"><div class="ex-sets">4 × 8–10</div><div class="ex-rest">Rest 2 min · RPE 7–8</div></div></div>
+      <div class="ex-grid"><div class="ex-num">02</div><div><div class="ex-name">Machine chest press (flat)</div><div class="ex-tip">Full ROM. 1-s peak contraction. Fixed path allows volume accumulation after stabiliser fatigue from DB press.</div><div class="ex-cite">Schoenfeld et al. (2020, Front Physiol): total weekly volume is the primary hypertrophy driver; machines allow safe volume after free-weight stabiliser fatigue.</div></div><div class="ex-right"><div class="ex-sets">3 × 10–12</div><div class="ex-rest">Rest 90 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">03</div><div><div class="ex-name">Seated DB shoulder press</div><div class="ex-tip">No elbow lockout — continuous tension. Neutral spine. Overhead pressing strength directly supports swim push-through.</div><div class="ex-cite">Toussaint & Beek (1992, Med Sci Sports Exerc): upper-body pushing power in overhead position is a primary determinant of freestyle propulsion efficiency.</div></div><div class="ex-right"><div class="ex-sets">3 × 10</div><div class="ex-rest">Rest 90 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">04</div><div><div class="ex-name">Cable lateral raise (single arm)</div><div class="ex-tip">Slight forward lean. Lead with pinky-side of hand. Cable maintains tension at 0° — dumbbell drops to zero at bottom.</div><div class="ex-cite">Botton et al. (2013, J Exerc Physiol): cable lateral raise produces superior medial deltoid EMG vs dumbbell across full ROM due to constant resistance profile.</div></div><div class="ex-right"><div class="ex-sets">3 × 12–15/side</div><div class="ex-rest">Rest 60 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">05</div><div><div class="ex-name">Cable tricep pushdown (rope)</div><div class="ex-tip">Elbows pinned. Flare rope at bottom for full long-head contraction. Tricep powers the swim stroke finish.</div><div class="ex-cite">Boeckh-Behrens & Buskies (2000): rope attachment allows wrist freedom at terminal extension — increases triceps long-head EMG vs bar attachment.</div></div><div class="ex-right"><div class="ex-sets">3 × 12–15</div><div class="ex-rest">Rest 60 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">06</div><div><div class="ex-name">Copenhagen plank (adductor + lateral core)</div><div class="ex-tip">Top leg on bench. Body straight. 20–30 s each side. Trains adductors + lateral core simultaneously — underworked in standard programmes.</div><div class="ex-cite">Harøy et al. (2019, BJSM): Copenhagen adductor exercise reduces groin injury rate in running athletes by 41% vs control.</div></div><div class="ex-right"><div class="ex-sets">2 × 20–30 s/side</div><div class="ex-rest">Rest 45 s</div></div></div>
+    </div>
+  </div>
+
+  <!-- GYM C -->
+  <div class="sess-content" id="sess-C">
+    <button class="gymmode-btn" onclick="openGym('C')">▶ Gym mode</button>
+    <div class="tip-box"><strong>Legs · Thu · ~65 min.</strong> Wks 1–3 RPE 6–7 (reintroduction), then 7–9. Compounds 2–3 min rest. <span class="cite">Llanos-Lagos et al. (2024, Sports Med meta-analysis, 54 studies): heavy strength training improves running economy +6% and vVO₂max after 6 weeks in recreational runners.</span></div>
+    <div class="card card-accent-gold" style="padding:14px 18px">
+      <div class="ex-grid"><div class="ex-num">01</div><div><div class="ex-name">Leg press</div><div class="ex-tip">Feet hip-width, mid-platform. Knees track over toes. No lockout. Lower to ~90° knee flexion.</div><div class="ex-cite">Haff & Triplett (NSCA 2016): leg press allows immediate safe quad/glute overload without technique constraint of barbell squat — lower barrier to progressive overload.</div></div><div class="ex-right"><div class="ex-sets">4 × 10</div><div class="ex-rest">Rest 2–3 min · RPE 7–8</div></div></div>
+      <div class="ex-grid"><div class="ex-num">02</div><div><div class="ex-name">Romanian deadlift</div><div class="ex-tip">Hinge, don't squat. Weight traces shins. Full hamstring stretch at bottom. Neutral spine throughout.</div><div class="ex-cite">Leppänen et al. (2024, BJSM): eccentric hamstring loading — the defining feature of RDL — is the highest-evidence injury prevention strategy for distance runners.</div></div><div class="ex-right"><div class="ex-sets">4 × 8–10</div><div class="ex-rest">Rest 2 min · RPE 7–8</div></div></div>
+      <div class="ex-grid"><div class="ex-num">03</div><div><div class="ex-name">Walking lunge (dumbbell)</div><div class="ex-tip">Step far — front knee over ankle. Upright torso. Single-leg stability directly mirrors running gait.</div><div class="ex-cite">Myer et al. (2014, J Athl Train): single-leg loading specificity for running biomechanics exceeds bilateral squat — improves dynamic valgus control.</div></div><div class="ex-right"><div class="ex-sets">3 × 10/leg</div><div class="ex-rest">Rest 90 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">04</div><div><div class="ex-name">Seated leg curl</div><div class="ex-tip">Seated position = longer hamstring muscle length = greater hypertrophic stimulus. 3-s eccentric.</div><div class="ex-cite">Maeo et al. (2021, Front Physiol): seated leg curl produces significantly greater distal hamstring hypertrophy than lying leg curl due to increased initial muscle length.</div></div><div class="ex-right"><div class="ex-sets">3 × 12</div><div class="ex-rest">Rest 90 s · RPE 7</div></div></div>
+      <div class="ex-grid"><div class="ex-num">05</div><div><div class="ex-name">Single-leg calf raise (on step)</div><div class="ex-tip">Full dorsiflexion at bottom. Full plantar flexion at top. Slow eccentric. Bilateral too easy — single-leg matches running demand.</div><div class="ex-cite">Dorn et al. (2012, J Exp Biol): gastrocnemius/soleus complex produces the largest muscle force in running — calf strength is the primary modifiable injury prevention target.</div></div><div class="ex-right"><div class="ex-sets">3 × 15/leg</div><div class="ex-rest">Rest 60 s · RPE 7–8</div></div></div>
+      <div class="ex-grid"><div class="ex-num">06</div><div><div class="ex-name">Hip thrust (weighted)</div><div class="ex-tip">Upper back on bench. Load across hip crease. Hard glute squeeze at top — 1 s hold. Hip stability mechanism for running.</div><div class="ex-cite">Powers (2010, J Orthop Sports Phys Ther): gluteus medius weakness is the primary biomechanical driver of IT band syndrome and patellofemoral pain in runners.</div></div><div class="ex-right"><div class="ex-sets">3 × 12</div><div class="ex-rest">Rest 90 s · RPE 7</div></div></div>
+    </div>
+  </div>
+
+  <!-- SWIM -->
+  <div class="sess-content" id="sess-swim">
+    <div class="tip-box teal"><strong>Swim · 2×/week · Phase 1 (technique foundation).</strong> Technique corrections compound over 3.8 km — one stroke fix yields more time than months of volume. <span class="cite teal">Vantorre et al. (2016, PMC, University of Bologna): neutral/downward head position reduces passive drag 4–10.9% across all tested speeds — the highest-ROI single correction for returning swimmers.</span></div>
+    <div class="card card-accent-teal">
+      <div class="card-title">Session 1 · Technique</div>
+      <div class="card-sub">~900 m · Tue or as scheduled</div>
+      <div class="swim-block"><div class="swim-block-h">Warm-up</div>
+        <div class="swim-row"><div>Easy freestyle — eyes to pool floor (neutral head drill)</div><div class="swim-dist">200 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Drills</div>
+        <div class="swim-row"><div><div>Kickboard — arms extended, neutral head</div><div class="swim-detail">Forces horizontal hip/body position. Isolates leg kick.</div></div><div class="swim-dist">4 × 25 m</div></div>
+        <div class="swim-row"><div><div>Catch-up drill — one arm extended until other completes pull</div><div class="swim-detail">Trains high-elbow catch timing. Forearm vertical = maximum propulsive surface. <span class="cite teal">Toussaint & Beek (1992, Med Sci Sports Exerc).</span></div></div><div class="swim-dist">4 × 25 m</div></div>
+        <div class="swim-row"><div><div>Fingertip drag — drag fingertips along surface on recovery</div><div class="swim-detail">Eliminates wide arm recovery. Teaches high-elbow exit position.</div></div><div class="swim-dist">4 × 25 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Main set — 30 s rest</div>
+        <div class="swim-row"><div><div>Steady intervals — maintain drill form, RPE 5–6</div></div><div class="swim-dist">6 × 100 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Cool-down</div>
+        <div class="swim-row"><div>Easy backstroke or freestyle</div><div class="swim-dist">100 m</div></div>
+      </div>
+    </div>
+    <div class="card card-accent-teal">
+      <div class="card-title">Session 2 · Breathing + aerobic base</div>
+      <div class="card-sub">~1,050 m · Fri or as scheduled</div>
+      <div class="swim-block"><div class="swim-block-h">Warm-up</div>
+        <div class="swim-row"><div>Easy freestyle</div><div class="swim-dist">200 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Drill</div>
+        <div class="swim-row"><div><div>Side kick drill — bottom arm extended, top arm on hip</div><div class="swim-detail">25 m each side. Body rotation is the mechanical basis of bilateral breathing. <span class="cite teal">Seifert et al. (2011, Int J Sports Med): rotation drills reduce O₂ cost of breathing motion.</span></div></div><div class="swim-dist">4 × 25 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Main set — 30 s rest · breathe every 3 strokes</div>
+        <div class="swim-row"><div><div>Bilateral breathing intervals, RPE 5–6</div><div class="swim-detail">Breathe every 2 if needed — don't force. Relaxation before rules. <span class="cite teal">F4L Coaching (2026): forced bilateral without technique causes head-lifting — root cause of most triathlete stroke breakdown.</span></div></div><div class="swim-dist">4 × 150 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Speed set</div>
+        <div class="swim-row"><div>Descending 50 s — each rep faster, last at RPE 8</div><div class="swim-dist">4 × 50 m</div></div>
+      </div>
+      <div class="swim-block"><div class="swim-block-h">Cool-down</div>
+        <div class="swim-row"><div>Easy</div><div class="swim-dist">100 m</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RUN -->
+  <div class="sess-content" id="sess-run">
+    <div class="tip-box" style="background:rgba(72,187,120,.05);border-color:rgba(72,187,120,.2)"><strong>Run · 2–3×/week.</strong> Zone 2 base = 70–75% max HR (full sentences at pace). Never increase weekly volume >10%. <span class="cite" style="color:rgba(72,187,120,.55)">Llanos-Lagos et al. (2024, Sports Med): combined heavy strength + running improved running economy +6% and vVO₂max — strength is your running multiplier, not a trade-off.</span></div>
+    <div class="card card-accent-green">
+      <div class="card-title">Wednesday · Easy run</div>
+      <div class="run-block"><div class="run-block-h">Warm-up (5 min)</div><div class="run-block-d">Brisk walk. Leg swings, hip circles × 10 each.</div></div>
+      <div class="run-block"><div class="run-block-h">Zone 2 run</div><div class="run-block-d">Conversational pace — full sentences. HR ~130–145 bpm. Builds aerobic base without recovery cost to gym sessions.</div><div class="run-meta">4–6 km · ~30–35 min</div></div>
+      <div class="run-block"><div class="run-block-h">Cool-down (5 min)</div><div class="run-block-d">Walk. Calf stretch + hip flexor stretch 30 s each side.</div></div>
+    </div>
+    <div class="card card-accent-green">
+      <div class="card-title">Saturday · Long run (the key session)</div>
+      <div class="run-block"><div class="run-block-h">Zone 2 long run — builds to marathon distance</div><div class="run-block-d">Start at 10–11 km. +1 km/week up to 20 km (Phase 1 ceiling). Marathon block (Oct): builds to 32 km. Run entirely by effort. Fuel every 45 min on runs >75 min: 30–60 g fast carbs/hour (gel, banana, dates).</div><div class="run-meta">Now: 10–11 km → Oct: 20 km → Dec: peak 32 km</div></div>
+      <div class="run-block" style="border-left:2px solid var(--gold);padding-left:10px"><div class="run-block-h">Marathon block: add tempo run (replaces Wed easy from Aug)</div><div class="run-block-d">6–10 km at 10–15 s/km slower than target pace. RPE 7–8. Improves lactate threshold — primary determinant of marathon performance.</div><div class="run-meta" style="color:var(--gold)">Starts Aug 2026</div></div>
+    </div>
+  </div>
+
+  <!-- BIKE -->
+  <div class="sess-content" id="sess-bike">
+    <div class="tip-box" style="background:rgba(159,122,234,.05);border-color:rgba(159,122,234,.2)"><strong>Cycling — Phase 3+ (2027 onward).</strong> Not current priority. When started, cycling will represent ~50% of total Ironman training volume. <span class="cite" style="color:rgba(159,122,234,.55)">Triathlete.com Ironman Guide: cycling is the longest discipline (5–7 hrs race time) — most first-time Ironman coaches recommend 50%+ training hours on the bike.</span></div>
+    <div class="card card-accent-purple">
+      <div class="card-title">Phase 3 intro (2027)</div>
+      <div class="run-block"><div class="run-block-h">Endurance ride (Zone 2)</div><div class="run-block-d">60–90 min conversational pace. Cadence 80–90 rpm. Road bike or indoor trainer. 2×/week.</div><div class="run-meta" style="color:var(--purple)">2 × 60–90 min/week</div></div>
+      <div class="run-block"><div class="run-block-h">Brick workout (bike → run)</div><div class="run-block-d">60 min easy bike immediately followed by 15–20 min easy run. Trains the quad-to-glute muscle recruitment shift at T2. The "brick legs" feeling disappears after 4–6 sessions.</div><div class="run-meta" style="color:var(--purple)">1×/week from Phase 3</div></div>
+      <div class="run-block" style="border-left:2px solid var(--red);padding-left:10px"><div class="run-block-h">Ironman bike caution</div><div class="run-block-d">Stay Zone 2–3 on bike even when feeling strong. Going too hard on the 180 km bike leg is the #1 cause of Ironman DNF and run collapse.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ NUTRITION ═══ -->
+<div class="page" id="page-nutrition">
+  <div class="stat-row">
+    <div class="stat-box"><div class="label-upper">Daily target</div><div class="stat-val">2,700</div><div class="stat-unit">kcal (+250 above TDEE)</div></div>
+    <div class="stat-box teal"><div class="label-upper">Protein</div><div class="stat-val teal">~165 g</div><div class="stat-unit">2.2 g/kg · target 150 g min</div></div>
+    <div class="stat-box green"><div class="label-upper">TDEE</div><div class="stat-val green">2,457</div><div class="stat-unit">kcal · office + 3–4×/wk</div></div>
+  </div>
+  <div class="tip-box"><strong>Evidence basis:</strong> Target 2.0–2.4 g protein/kg/day. <span class="cite">Morton et al. (2018, BJSM, 49-study meta-analysis): 1.62 g/kg plateau for FFM gains, but 2.0–2.4 g/kg is recommended for trained individuals in caloric surplus. MDPI Sports Nutrition Review (Nov 2025): upper end of range more appropriate at higher training volumes.</span> Distribute across 4–5 meals (~30 g each). <span class="cite">Paddon-Jones et al. (J Nutrition): 30 g/meal spacing produces ~25% higher 24-h MPS vs skewed intake.</span></div>
+  <div class="card card-accent-gold">
+    <div class="card-title">Daily timeline — gym morning (8:00)</div>
+    <div class="meal-line" style="margin-top:16px">
+      <div class="meal-item">
+        <div><div class="meal-time">06:30</div></div>
+        <div class="meal-dot" style="background:var(--gold)"></div>
+        <div class="meal-body">
+          <div class="meal-name">Pre-workout</div>
+          <div class="meal-desc">½ oat portion (30 g) + 1 banana + 300 ml farm milk. Chia seeds moved post-workout — dietary fat slows gastric emptying and blunts carb availability.</div>
+          <div class="macro-row"><span class="macro mc">~45 g carbs</span><span class="macro mp">~15 g protein</span></div>
+          <span class="meal-cite">Jiménez-Alfageme et al. (2025, Front Sports): 1–4 g/kg carbs + 0.3 g/kg protein 1–4 h pre-exercise raises muscle glycogen and stimulates pre-exercise MPS.</span>
+        </div>
+      </div>
+      <div class="meal-item">
+        <div><div class="meal-time">09:15</div></div>
+        <div class="meal-dot" style="background:var(--gold)"></div>
+        <div class="meal-body">
+          <div class="meal-name">Post-workout recovery</div>
+          <div class="meal-desc">200 g Greek yoghurt + 200 g cottage cheese + remaining 30 g oats + chia seeds + apple. Whey (yoghurt) = fast MPS stimulus. Casein (cottage cheese) = sustained release. Optimal combination.</div>
+          <div class="macro-row"><span class="macro mp">~52 g protein</span><span class="macro mc">~45 g carbs</span></div>
+          <span class="meal-cite">Cheng et al. (2025, Front Nutr systematic review): carbs + 0.3 g/kg protein post-exercise optimises glycogen resynthesis and MPS simultaneously.</span>
+        </div>
+      </div>
+      <div class="meal-item">
+        <div><div class="meal-time">12:00</div></div>
+        <div class="meal-dot" style="background:var(--gold)"></div>
+        <div class="meal-body">
+          <div class="meal-name">Lunch</div>
+          <div class="meal-desc">200 g chicken + 100 g dry rice (cooked) + roasted vegetables + salad + 1 tbsp olive oil. Add avocado for fat target.</div>
+          <div class="macro-row"><span class="macro mp">~48 g protein</span><span class="macro mc">~70 g carbs</span><span class="macro mf">~12 g fat</span></div>
+          <span class="meal-cite">Hamalainen et al. (1984, J Steroid Biochem): dietary fat intake &lt;20% of kcal significantly reduces testosterone — maintain 20–35% fat for hormonal support of hypertrophy.</span>
+        </div>
+      </div>
+      <div class="meal-item">
+        <div><div class="meal-time">16:00</div></div>
+        <div class="meal-dot" style="background:var(--muted)"></div>
+        <div class="meal-body">
+          <div class="meal-name">Afternoon snack — training days only</div>
+          <div class="meal-desc">1 banana + 100 g cottage cheese. Skip on rest days. Pre-fuel if evening swim or run.</div>
+          <div class="macro-row"><span class="macro mc">~28 g carbs</span><span class="macro mp">~12 g protein</span></div>
+        </div>
+      </div>
+      <div class="meal-item">
+        <div><div class="meal-time">19:30</div></div>
+        <div class="meal-dot" style="background:var(--gold)"></div>
+        <div class="meal-body">
+          <div class="meal-name">Dinner</div>
+          <div class="meal-desc">4–5 eggs + 2 slices wholegrain bread + raw vegetables + ½ avocado or 1 tbsp olive oil. Add 100 g cottage cheese for pre-sleep casein.</div>
+          <div class="macro-row"><span class="macro mp">~38 g protein</span><span class="macro mf">~18 g fat</span><span class="macro mc">~30 g carbs</span></div>
+          <span class="meal-cite">Res et al. (2012, Med Sci Sports Exerc): pre-sleep casein protein increases overnight MPS by ~22%. Eggs: highest leucine density of whole foods — leucine is the rate-limiting trigger for MPS (Norton & Layman, 2006).</span>
+        </div>
+      </div>
+      <div class="meal-item">
+        <div><div class="meal-time" style="color:var(--teal)">Long run</div></div>
+        <div class="meal-dot" style="background:var(--teal)"></div>
+        <div class="meal-body">
+          <div class="meal-name">Intra-run fuelling (runs >75 min)</div>
+          <div class="meal-desc">30–60 g fast carbs/hour from 45–60 min onward: energy gel, banana, or dates. Train your gut on every long run — GI distress causes ~30% of marathon DNFs.</div>
+          <div class="macro-row"><span class="macro mc">30–60 g/hr</span><span class="macro me">Electrolytes</span></div>
+          <span class="meal-cite">Cermak & van Loon (2013, Sports Med): intra-exercise carbohydrate maintains euglycaemia and delays fatigue in sessions >60–90 min. Sodium co-ingestion improves fluid retention in heat.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ROADMAP ═══ -->
+<div class="page" id="page-roadmap">
+  <div class="section-h">multi-year plan — marathon to ironman</div>
+  <div class="rm-phases">
+    <div class="rm-item">
+      <div class="rm-dot" style="border-color:var(--gold);color:var(--gold)">1</div>
+      <div class="rm-body">
+        <div class="rm-phase-num" style="color:var(--gold)">Phase 1 · Foundation</div>
+        <div class="rm-title" style="color:var(--gold)">Strength + swim base</div>
+        <div class="rm-period">Jun 2026 → Oct 2026</div>
+        <ul class="rm-list" style="--c:var(--gold)">
+          <li style="color:var(--muted)">Gym 3×/week (Pull/Push/Legs) — strength base protects marathon and triathlon phases</li>
+          <li style="color:var(--muted)">Run 2×/week: easy Zone 2 + long run building to 20 km</li>
+          <li style="color:var(--muted)">Swim 2×/week: technique drills (head position, high-elbow catch, bilateral breathing)</li>
+          <li style="color:var(--muted)">Double progression on all gym lifts — add reps before weight</li>
+          <li style="color:var(--muted)">Strength-before-cardio on any same-day sessions</li>
+        </ul>
+        <span class="rm-cite">Schumann et al. (2022, Sports Med, 43-study meta-analysis): concurrent training does not meaningfully impair hypertrophy or maximal strength. Zhang et al. (2026, Front Sports, 42 studies): strength-first order optimises neuromuscular adaptation.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-dot" style="border-color:var(--yellow,#facc15);color:#facc15">2</div>
+      <div class="rm-body">
+        <div class="rm-phase-num" style="color:#facc15">Phase 2 · Marathon block</div>
+        <div class="rm-title" style="color:#facc15">First race — winter 2026</div>
+        <div class="rm-period">Oct → Dec 2026 · ~13 weeks</div>
+        <ul class="rm-list">
+          <li style="color:var(--muted)">Running becomes primary: easy + tempo + long run (builds to 32 km)</li>
+          <li style="color:var(--muted)">Gym → 2×/week maintenance: 3 sets, injury prevention priority</li>
+          <li style="color:var(--muted)">Keep RDL + single-leg calf raise as injury prevention non-negotiables</li>
+          <li style="color:var(--muted)">Practice long-run fuelling — gut-train with gels every 45 min from 75 min onward</li>
+          <li style="color:var(--muted)">3-week taper: volume ↓ 30–40%, intensity maintained</li>
+        </ul>
+        <span class="rm-cite">Leppänen et al. (2024, BJSM): hip/core strength training significantly reduces running injury vs stretching (p &lt; 0.05). Llanos-Lagos et al. (2024, Sports Med): +6% running economy gain from 6-week strength block persists into endurance phase.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-dot" style="border-color:var(--green);color:var(--green)">3</div>
+      <div class="rm-body">
+        <div class="rm-phase-num" style="color:var(--green)">Phase 3 · Triathlon entry</div>
+        <div class="rm-title" style="color:var(--green)">Sprint → Olympic → 70.3</div>
+        <div class="rm-period">Jan 2027 → Dec 2027</div>
+        <ul class="rm-list">
+          <li style="color:var(--muted)">Add cycling: 2×/week Zone 2 + 1× brick workout (bike → run)</li>
+          <li style="color:var(--muted)">Sprint triathlon (750 m / 20 km / 5 km) — Q2 2027</li>
+          <li style="color:var(--muted)">Olympic triathlon (1.5 km / 40 km / 10 km) — Q3/Q4 2027</li>
+          <li style="color:var(--muted)">Swim → 3×/week, build to 2,000–2,500 m sessions, open water monthly</li>
+          <li style="color:var(--muted)">Ironman 70.3 target: late 2027 or early 2028 as qualifier</li>
+          <li style="color:var(--muted)">Gym → 2×/week maintenance only</li>
+        </ul>
+        <span class="rm-cite">T100 Triathlon Guide (2026): open-water drafting saves up to 25% swim effort — must practise. Halonen et al. (2024, Scand J Med Sci Sports): muscle memory allows full adaptation recovery within 5 weeks after detraining — training breaks during race build-up are not catastrophic.</span>
+      </div>
+    </div>
+    <div class="rm-item">
+      <div class="rm-dot" style="border-color:var(--red);color:var(--red)">4</div>
+      <div class="rm-body">
+        <div class="rm-phase-num" style="color:var(--red)">Phase 4 · Ironman</div>
+        <div class="rm-title" style="color:var(--red)">Full distance — 2028–2030</div>
+        <div class="rm-period">2028 → race day</div>
+        <ul class="rm-list">
+          <li style="color:var(--muted)">8–18 hrs/week peak training: 5–6 days, sometimes 2 sessions/day</li>
+          <li style="color:var(--muted)">Bike dominant: ~50% of total training volume</li>
+          <li style="color:var(--muted)">Swim 3–4×/week: 3,000–4,000 m sessions, open water, drafting, sighting</li>
+          <li style="color:var(--muted)">Gym → 2×/week: injury prevention, not hypertrophy</li>
+          <li style="color:var(--muted)">Periodisation: 3–4 week build → 1 week recovery, repeat</li>
+          <li style="color:var(--muted)">Taper: 4–6 weeks out — volume ↓, intensity maintained</li>
+          <li style="color:var(--muted)">Minimum 24 weeks specific preparation for first full Ironman</li>
+        </ul>
+        <span class="rm-cite">MyProCoach Full Ironman Guide: 24+ weeks minimum from structured base for first-timers. Beginner Triathlete: 8–18 hrs/week. Zone 2 pacing on bike is critical — exceeding Zone 3 on the bike is the primary cause of Ironman run collapse and DNF.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TRACKER ═══ -->
+<div class="page" id="page-tracker">
+  <div class="section-h">log a session</div>
+  <div class="card card-accent-gold">
+    <div class="log-form-grid">
+      <div><div class="field-lbl">Session</div>
+        <select id="logType">
+          <option value="gym">Gym A — Pull</option>
+          <option value="gym">Gym B — Push</option>
+          <option value="gym">Gym C — Legs</option>
+          <option value="swim">Swim</option>
+          <option value="run">Run</option>
+          <option value="bike">Bike</option>
+        </select>
+      </div>
+      <div><div class="field-lbl">Date</div><input type="date" id="logDate"></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn-gold" onclick="addLog()">+ Log</button></div>
+    </div>
+    <div><div class="field-lbl">Notes</div>
+      <textarea id="logNotes" rows="2" placeholder="e.g. Leg press 4×10 @ 80 kg · RDL 4×8 @ 40 kg · felt strong, full ROM on all reps"></textarea>
+    </div>
+  </div>
+  <div class="week-stat-row" id="weekStats"></div>
+  <div class="div"></div>
+  <div class="section-h">history</div>
+  <div id="logList"><div class="empty-log">No sessions logged yet. Start tracking — your history will appear here.</div></div>
+</div>
+
+<script>
+const SESSIONS = {
+  A:{name:'Session A — Pull + Core',exercises:[
+    {name:'Lat pulldown',sets:'4 × 8–10',rest:'2 min rest',tip:'Elbows drive down and back. 15° lean. Full stretch at top. Initiate with lats, not biceps.',cite:'Andersen et al. (2014, J Strength Cond Res): shoulder-width overhand = peak lat EMG.'},
+    {name:'Seated cable row',sets:'4 × 10',rest:'90 s rest',tip:'Row to lower sternum. 1-s scapular retraction. Neutral spine on eccentric.',cite:'Leppänen et al. (2024, BJSM): horizontal pull trains rhomboid/mid-trap — reduces marathon injury.'},
+    {name:'Chest-supported DB row',sets:'3 × 10',rest:'90 s rest',tip:'Prone on incline bench. Eliminates lumbar compensation. Lead with elbow, squeeze at top.',cite:'Schoenfeld (2021, NSCA): prone support isolates lat/rhomboid — removes posterior-chain fatigue confound.'},
+    {name:'Face pull (rope, eye-level)',sets:'3 × 15',rest:'60 s rest',tip:'External rotation at end-range. Upper arms parallel to floor. Restores posterior cuff balance.',cite:'Reinold et al. (2009, AJSM): face pull + ER drill = most effective conservative treatment for subacromial impingement.'},
+    {name:'DB curl (supinated)',sets:'3 × 10–12',rest:'60 s rest',tip:'No swing. 2-s eccentric. Supinate throughout arc — not just at peak.',cite:'Staudenmann et al. (2010, J Electromyogr Kinesiol): full supination = significantly higher bicep short-head EMG vs neutral.'},
+    {name:'Dead bug',sets:'3 × 10/side',rest:'45 s rest',tip:'Lumbar flat throughout. Opposite arm/leg extend slowly. Exhale on extension. Anti-extension, not flexion.',cite:'McGill (2010, Clin Biomech): lumbar stiffness reduces metabolic energy loss at each running stride.'},
+  ]},
+  B:{name:'Session B — Push',exercises:[
+    {name:'Incline DB press (30–45°)',sets:'4 × 8–10',rest:'2 min rest',tip:'2-s descent. Elbows ~45°. No lockout — keep tension on pec.',cite:'Barnett et al. (1995): incline maximises upper pec + anterior delt activation. Anterior delt supports swim catch phase.'},
+    {name:'Machine chest press',sets:'3 × 10–12',rest:'90 s rest',tip:'Full ROM. 1-s peak contraction. Allows volume accumulation after DB stabiliser fatigue.',cite:'Schoenfeld et al. (2020, Front Physiol): total volume is the primary hypertrophy driver — machines allow safe high-rep accumulation.'},
+    {name:'Seated DB shoulder press',sets:'3 × 10',rest:'90 s rest',tip:'No elbow lockout. Neutral spine. Overhead pushing strength supports swim push-through.',cite:'Toussaint & Beek (1992, Med Sci Sports): upper-body overhead power is primary determinant of freestyle propulsion efficiency.'},
+    {name:'Cable lateral raise (single arm)',sets:'3 × 12–15/side',rest:'60 s rest',tip:'Slight forward lean. Lead with pinky-side. Cable maintains tension at 0° — dumbbell doesn\'t.',cite:'Botton et al. (2013): cable lateral produces superior medial delt EMG vs dumbbell across full ROM.'},
+    {name:'Cable tricep pushdown (rope)',sets:'3 × 12–15',rest:'60 s rest',tip:'Elbows pinned. Flare rope at bottom for full long-head contraction.',cite:'Boeckh-Behrens & Buskies (2000): rope attachment increases tricep long-head activation via wrist freedom.'},
+    {name:'Copenhagen plank (each side)',sets:'2 × 20–30 s/side',rest:'45 s rest',tip:'Top leg on bench. Body straight. Trains adductors + lateral core simultaneously.',cite:'Harøy et al. (2019, BJSM): Copenhagen exercise reduces groin injury rate in runners by 41%.'},
+  ]},
+  C:{name:'Session C — Legs',exercises:[
+    {name:'Leg press',sets:'4 × 10',rest:'2–3 min rest',tip:'Feet hip-width, mid-platform. Knees track toes. No lockout. ~90° knee angle at bottom.',cite:'Haff & Triplett (NSCA 2016): leg press allows immediate safe overload without barbell squat technique constraint.'},
+    {name:'Romanian deadlift',sets:'4 × 8–10',rest:'2 min rest',tip:'Hinge, don\'t squat. Weight traces shins. Full hamstring stretch at bottom. Neutral spine.',cite:'Leppänen et al. (2024, BJSM): eccentric hamstring loading — the RDL\'s defining feature — is the highest-evidence running injury prevention exercise.'},
+    {name:'Walking lunge (dumbbell)',sets:'3 × 10/leg',rest:'90 s rest',tip:'Step far — front knee over ankle. Upright torso. Single-leg = running gait specificity.',cite:'Myer et al. (2014, J Athl Train): single-leg loading outperforms bilateral squats for running-specific dynamic valgus control.'},
+    {name:'Seated leg curl',sets:'3 × 12',rest:'90 s rest',tip:'Seated = longer muscle length = greater hypertrophy. 3-s eccentric.',cite:'Maeo et al. (2021, Front Physiol): seated leg curl produces significantly greater distal hamstring hypertrophy than lying variant.'},
+    {name:'Single-leg calf raise (step)',sets:'3 × 15/leg',rest:'60 s rest',tip:'Full stretch at bottom. Full rise at top. Slow eccentric. One leg — bilateral too easy for running demand.',cite:'Dorn et al. (2012, J Exp Biol): gastrocnemius/soleus produces the largest force in running — #1 modifiable injury prevention target.'},
+    {name:'Hip thrust (weighted)',sets:'3 × 12',rest:'90 s rest',tip:'Upper back on bench. Load across hip crease. Hard glute squeeze at top — 1 s hold.',cite:'Powers (2010, J Orthop Sports PT): gluteus medius weakness is primary driver of IT band syndrome and patellofemoral pain in runners.'},
+  ]},
+};
+
+const WEEK=[
+  {day:'Mon',sessions:[{type:'gym',label:'Gym A — Pull',note:'8:00–9:15'}]},
+  {day:'Tue',sessions:[{type:'gym',label:'Gym B — Push',note:'8:00–9:15'},{type:'swim',label:'Swim · Session 2',note:'evening if possible'}]},
+  {day:'Wed',sessions:[{type:'run',label:'Easy run 4–6 km',note:'Zone 2 · ~35 min'}]},
+  {day:'Thu',sessions:[{type:'gym',label:'Gym C — Legs',note:'8:00–9:15'}]},
+  {day:'Fri',sessions:[{type:'swim',label:'Swim · Session 1',note:'technique focus'},{type:'rest',label:'or calisthenics',note:'optional'}]},
+  {day:'Sat',sessions:[{type:'run',label:'Long run 10–14 km',note:'Zone 2 · fuel >75 min'}]},
+  {day:'Sun',sessions:[{type:'rest',label:'Full rest',note:'sleep + mobility'}]},
+];
+
+const todayDow=new Date().getDay();
+const todayIdx=[6,0,1,2,3,4,5][todayDow];
+document.getElementById('navDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+document.getElementById('logDate').value=new Date().toISOString().split('T')[0];
+
+const wg=document.getElementById('weekGrid');
+WEEK.forEach((d,i)=>{
+  const t=document.createElement('div');
+  t.className='day-tile'+(i===todayIdx?' today':'');
+  t.innerHTML=`<div class="day-name-h">${d.day}</div>`+d.sessions.map(s=>`<span class="session-pill sp-${s.type}">${s.label}</span><div class="session-note">${s.note}</div>`).join('');
+  wg.appendChild(t);
+});
+
+function goPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='tracker')renderLogs();
+  updateWeekVol();
+}
+function showSess(id,btn){
+  document.querySelectorAll('.sess-content').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sess-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sess-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleCheck(li){
+  li.querySelector('.check-box').classList.toggle('on');
+  li.querySelector('.check-text').classList.toggle('on');
+  const total=document.querySelectorAll('#prepList .check-item').length;
+  const done=document.querySelectorAll('#prepList .check-box.on').length;
+  document.getElementById('prepFill').style.width=(done/total*100)+'%';
+}
+
+// GYM MODE
+let gmExs=[],gmIdx=0,gmSess='',tmr=null,tmrSec=0;
+function openGym(s){
+  gmSess=s;gmExs=SESSIONS[s].exercises;gmIdx=0;
+  document.getElementById('gymOverlay').style.display='block';
+  document.body.style.overflow='hidden';
+  document.getElementById('gm-sess-name').textContent=SESSIONS[s].name;
+  renderGM();
+}
+function closeGym(){
+  document.getElementById('gymOverlay').style.display='none';
+  document.body.style.overflow='';
+  stopTmr();
+}
+function renderGM(){
+  const ex=gmExs[gmIdx];
+  document.getElementById('gm-prog').textContent=`Exercise ${gmIdx+1} of ${gmExs.length}`;
+  document.getElementById('gm-name').textContent=ex.name;
+  document.getElementById('gm-sets').textContent=ex.sets;
+  document.getElementById('gm-rest-lbl').textContent=ex.rest;
+  document.getElementById('gm-tip').textContent=ex.tip+' ';
+  document.getElementById('gm-cite').textContent=ex.cite;
+  const numSets=parseInt(ex.sets)||3;
+  const dt=document.getElementById('gm-dots');dt.innerHTML='';
+  for(let i=0;i<numSets;i++){
+    const d=document.createElement('div');d.className='set-dot';d.textContent=i+1;
+    d.onclick=()=>{
+      d.classList.toggle('done');
+      if(d.classList.contains('done')){
+        const m=ex.rest.match(/(\d+)\s*(min|s)/);
+        if(m)startTmr(m[2]==='min'?+m[1]*60:+m[1]);
+      }
+    };
+    dt.appendChild(d);
+  }
+  stopTmr();
+}
+function gmMove(dir){const n=gmIdx+dir;if(n<0||n>=gmExs.length)return;gmIdx=n;renderGM();}
+function startTmr(s){
+  stopTmr();tmrSec=s;
+  document.getElementById('restTimer').style.display='block';
+  document.getElementById('timerVal').textContent=tmrSec;
+  tmr=setInterval(()=>{tmrSec--;document.getElementById('timerVal').textContent=tmrSec<0?'Go!':tmrSec;if(tmrSec<=0)stopTmr();},1000);
+}
+function stopTmr(){if(tmr){clearInterval(tmr);tmr=null;}document.getElementById('restTimer').style.display='none';}
+function gmFinish(){
+  const d=new Date().toISOString().split('T')[0];
+  const logs=JSON.parse(localStorage.getItem('athlogs')||'[]');
+  logs.unshift({type:'gym',session:SESSIONS[gmSess].name,date:d,notes:'Completed via gym mode'});
+  localStorage.setItem('athlogs',JSON.stringify(logs));
+  closeGym();
+  alert('Session logged ✓');
+}
+
+// TRACKER
+function addLog(){
+  const sel=document.getElementById('logType');
+  const type=sel.value;
+  const label=sel.options[sel.selectedIndex].text;
+  const date=document.getElementById('logDate').value;
+  const notes=document.getElementById('logNotes').value.trim();
+  if(!date)return;
+  const logs=JSON.parse(localStorage.getItem('athlogs')||'[]');
+  logs.unshift({type,session:label,date,notes});
+  localStorage.setItem('athlogs',JSON.stringify(logs));
+  document.getElementById('logNotes').value='';
+  renderLogs();updateWeekVol();
+}
+function delLog(i){
+  const logs=JSON.parse(localStorage.getItem('athlogs')||'[]');
+  logs.splice(i,1);
+  localStorage.setItem('athlogs',JSON.stringify(logs));
+  renderLogs();updateWeekVol();
+}
+function renderLogs(){
+  const logs=JSON.parse(localStorage.getItem('athlogs')||'[]');
+  const el=document.getElementById('logList');
+  if(!logs.length){el.innerHTML='<div class="empty-log">No sessions logged yet.</div>';return;}
+  el.innerHTML=logs.map((l,i)=>`
+    <div class="log-entry ${l.type}">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+          <span class="log-type-tag">${l.session}</span>
+          <span class="log-date">${l.date}</span>
+        </div>
+        ${l.notes?`<div class="log-notes">${l.notes}</div>`:''}
+      </div>
+      <button class="log-del" onclick="delLog(${i})">✕</button>
+    </div>`).join('');
+  renderWeekStats(logs);
+}
+function renderWeekStats(logs){
+  const wk=new Date(Date.now()-7*864e5);
+  const tw=logs.filter(l=>new Date(l.date)>=wk);
+  const c={gym:0,run:0,swim:0,bike:0};
+  tw.forEach(l=>{if(c[l.type]!==undefined)c[l.type]++;});
+  document.getElementById('weekStats').innerHTML=`
+    <div class="stat-box"><div class="label-upper">Gym</div><div class="stat-val">${c.gym}<span style="font-size:14px;color:var(--muted)"> /3</span></div></div>
+    <div class="stat-box teal"><div class="label-upper">Run</div><div class="stat-val teal">${c.run}<span style="font-size:14px;color:var(--muted)"> /2</span></div></div>
+    <div class="stat-box green"><div class="label-upper">Swim</div><div class="stat-val green">${c.swim}<span style="font-size:14px;color:var(--muted)"> /2</span></div></div>`;
+}
+function updateWeekVol(){
+  const wk=new Date(Date.now()-7*864e5);
+  const logs=JSON.parse(localStorage.getItem('athlogs')||'[]');
+  const n=logs.filter(l=>new Date(l.date)>=wk).length;
+  const el=document.getElementById('weekVol');
+  if(el)el.textContent=n;
+}
+updateWeekVol();
+renderLogs();
+</script>
+</body>
+</html>
